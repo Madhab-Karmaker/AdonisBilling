@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('bills', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained()->onDelete('cascade'); // Link to organization
+            $table->string('customer_name', 100); // Customer name
+            $table->decimal('total_amount', 10, 2)->default(0); // Total amount for the bill
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade'); // Receptionist who created the bill
             $table->timestamps();
         });
     }

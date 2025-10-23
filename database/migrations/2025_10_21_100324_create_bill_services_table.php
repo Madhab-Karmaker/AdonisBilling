@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('bill_services', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained()->onDelete('cascade'); // Salon
+            $table->foreignId('bill_id')->constrained()->onDelete('cascade'); // Links to bill
+            $table->foreignId('service_id')->constrained()->onDelete('cascade'); // Service provided
+            $table->decimal('total_price', 10, 2)->default(0); // Total price for this service
             $table->timestamps();
         });
     }
