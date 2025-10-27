@@ -28,12 +28,12 @@ class ServiceController extends Controller
         Service::create([
             'name' => $validated['name'],
             'price' => $validated['price'],
-            'salon_id' => auth()->user()->salon_id, // manager’s salon
+            'salon_id' => $validated['salon_id'],
         ]);
 
         return redirect()->route('services.index')->with('success', 'Service created successfully.');
     }
-    public function edit(){
+    public function edit(Service $service){
         return view('services.edit', compact('service'));
     }
     public function update(Request $request, Service $service)
@@ -41,6 +41,7 @@ class ServiceController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric',
+            'salon_id' => 'required|exists:salons,id',
         ]);
 
         $service->update($validated);

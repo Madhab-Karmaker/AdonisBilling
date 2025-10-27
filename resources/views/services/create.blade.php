@@ -15,6 +15,10 @@
             <label>Price</label>
             <input type="number" name="price" class="form-control" step="0.01" required>
         </div>
+        <div class="mb-3">
+            <label>Salon Id </label>
+            <input type="number" name="salon_id" class="form-control" step="0.01" required>
+        </div>
 
         <button type="submit" class="btn btn-success">Save</button>
     </form>

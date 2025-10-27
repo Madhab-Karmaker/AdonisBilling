@@ -18,6 +18,11 @@
             <input type="number" name="price" value="{{ $service->price }}" class="form-control" step="0.01" required>
         </div>
 
+        <div class="mb-3">
+            <label>Salon Id</label>
+            <input readonly type="number" name="salon_id" value="{{ $service->salon_id }}" class="form-control" step="0.01" required>
+        </div>
+
         <button type="submit" class="btn btn-primary">Update</button>
     </form>
 </div>
