@@ -28,15 +28,13 @@ class BillController extends Controller
             'customer_name' => 'required|string',
             'service_id' => 'required|array',
             'quantity' => 'required|array',
-            'receptionist_id' => 'required|integer|exists:users,id'
         ]);
 
-        // Create bill (testing mode, salon_id = 1)
+        // Create bill for the current user's salon and receptionist
         $bill = Bill::create([
             'customer_name' => $validated['customer_name'],
             'total_price' => 0,
-            'salon_id' => 1,
-            'receptionist_id' => $validated['receptionist_id']
+            'receptionist_id' => auth()->id(),
         ]);
 
         $total = 0;

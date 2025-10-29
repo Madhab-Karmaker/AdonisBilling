@@ -54,11 +54,6 @@
 
         <button type="button" class="btn btn-secondary mb-3" id="add-service">+ Add Service</button>
 
-        <div class="mb-3">
-            <label class="form-label">Receptionist ID (for testing)</label>
-            <input type="number" name="receptionist_id" class="form-control" value="1" required>
-        </div>
-
         <button type="submit" class="btn btn-primary">Save Bill</button>
     </form>
 </div>

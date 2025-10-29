@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Service;
+use App\Controler\UserController;
 class ServiceController extends Controller
 {
     public function index()
@@ -22,14 +23,10 @@ class ServiceController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric',
-            'salon_id' => 'required|exists:salons,id',
         ]);
+        $validated ['salon_id'] = auth()->user()->salon_id;
 
-        Service::create([
-            'name' => $validated['name'],
-            'price' => $validated['price'],
-            'salon_id' => $validated['salon_id'],
-        ]);
+        Service::create($validated);
 
         return redirect()->route('services.index')->with('success', 'Service created successfully.');
     }
@@ -41,7 +38,6 @@ class ServiceController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric',
-            'salon_id' => 'required|exists:salons,id',
         ]);
 
         $service->update($validated);

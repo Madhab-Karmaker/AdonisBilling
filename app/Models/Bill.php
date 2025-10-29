@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\BelongsToSalon;
 
     class Bill extends Model
     {
+        use BelongsToSalon;
         protected $fillable = [
             'customer_name',
             'total_price',

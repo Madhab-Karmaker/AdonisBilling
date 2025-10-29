@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h2>Add New Service</h2>
+    <h2>Add Service for {{ Auth::user()->salon?->name ?? 'No Salon Assigned' }}</h2> <!-- Salon name in heading -->
 
     <form action="{{ route('services.store') }}" method="POST">
         @csrf
@@ -15,12 +15,12 @@
             <label>Price</label>
             <input type="number" name="price" class="form-control" step="0.01" required>
         </div>
-        <div class="mb-3">
-            <label>Salon Id </label>
-            <input type="number" name="salon_id" class="form-control" step="0.01" required>
-        </div>
 
         <button type="submit" class="btn btn-success">Save</button>
+        <div class="mb-3">
+            <label>Added by : {{Auth::user()->name }}</label>
+        </div>
+
     </form>
 </div>
 @endsection

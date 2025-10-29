@@ -6,9 +6,10 @@
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Customer</th>
-                <th>Total</th>
-                <th>Created At</th>
+                <th> Customer Name </th>
+                <th> Order Amount </th>
+                <th> Customer Phone Number </th>
+                <th> Created At</th>
             </tr>
         </thead>
         <tbody>
