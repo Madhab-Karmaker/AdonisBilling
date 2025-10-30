@@ -26,15 +26,19 @@ class BillController extends Controller
         // Validation
         $validated = $request->validate([
             'customer_name' => 'required|string',
+            'customer_phone' => 'nullable|string',
             'service_id' => 'required|array',
             'quantity' => 'required|array',
+            
         ]);
 
         // Create bill for the current user's salon and receptionist
         $bill = Bill::create([
             'customer_name' => $validated['customer_name'],
-            'total_price' => 0,
+            'customer_phone' => $validated['customer_phone'] ?? null,
+            'total_amount' => 0, // Will update later
             'receptionist_id' => auth()->id(),
+            'salon_id' => auth()->user()->salon_id,
         ]);
 
         $total = 0;
@@ -56,7 +60,7 @@ class BillController extends Controller
         }
 
         // Update total
-        $bill->update(['total_price' => $total]);
+        $bill->update(['total_amount' => $total]);
 
         return redirect()->route('bills.index')->with('success', 'Bill created successfully!');
     }

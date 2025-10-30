@@ -10,7 +10,8 @@ use App\Models\Concerns\BelongsToSalon;
         use BelongsToSalon;
         protected $fillable = [
             'customer_name',
-            'total_price',
+            'customer_phone',
+            'total_amount',
             'salon_id',
             'receptionist_id',
         ];

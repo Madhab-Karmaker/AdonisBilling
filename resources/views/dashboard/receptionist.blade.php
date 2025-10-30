@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Receptionist Dashboard - Salon Billing</title>
+@extends('layouts.app')
+
+@section('content')
     <style>
         * {
             margin: 0;
@@ -215,17 +212,11 @@
             font-size: 0.9rem;
         }
     </style>
-</head>
-<body>
     <div class="header">
         <div class="header-content">
             <h1>Receptionist Dashboard</h1>
             <div class="user-info">
                 <span>Welcome, {{ $user->name }}</span>
-                <form method="POST" action="/logout" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="logout-btn">Logout</button>
-                </form>
             </div>
         </div>
     </div>
@@ -239,12 +230,12 @@
         <div class="quick-actions">
             <h3>🚀 Quick Actions</h3>
             <div class="quick-actions-grid">
-                <a href="{{ route('bills.create') }}" class="quick-action-btn">
+                <a href="{{ route('receptionist.bills.create') }}" class="quick-action-btn">
                     <div style="font-size: 2rem; margin-bottom: 0.5rem;">💳</div>
                     <div><strong>Create New Bill</strong></div>
                     <div style="font-size: 0.8rem; color: #666;">Start billing process</div>
                 </a>
-                <a href="{{ route('bills.index') }}" class="quick-action-btn">
+                <a href="{{ route('receptionist.bills.index') }}" class="quick-action-btn">
                     <div style="font-size: 2rem; margin-bottom: 0.5rem;">📋</div>
                     <div><strong>View All Bills</strong></div>
                     <div style="font-size: 0.8rem; color: #666;">Browse recent bills</div>
@@ -267,8 +258,8 @@
                 <h3>💳 Billing Management</h3>
                 <p>Create new bills, process payments, and manage customer transactions efficiently.</p>
                 <div class="card-actions">
-                    <a href="{{ route('bills.create') }}" class="btn btn-primary">New Bill</a>
-                    <a href="{{ route('bills.index') }}" class="btn btn-secondary">View Bills</a>
+                    <a href="{{ route('receptionist.bills.create') }}" class="btn btn-primary">New Bill</a>
+                    <a href="{{ route('receptionist.bills.index') }}" class="btn btn-secondary">View Bills</a>
                 </div>
             </div>
 
@@ -310,5 +301,4 @@
             </div>
         </div>
     </div>
-</body>
-</html>
+@endsection
