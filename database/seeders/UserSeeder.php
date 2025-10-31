@@ -17,7 +17,6 @@ class UserSeeder extends Seeder
         // Create a sample salon first
         $salon = Salon::create([
             'name' => 'Beauty Palace Salon',
-            'address' => '123 Main Street, City, State',
             'phone' => '+1-555-0123',
             'email' => 'info@beautypalace.com',
         ]);

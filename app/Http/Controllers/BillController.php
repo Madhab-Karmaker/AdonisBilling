@@ -62,6 +62,6 @@ class BillController extends Controller
         // Update total
         $bill->update(['total_amount' => $total]);
 
-        return redirect()->route('bills.index')->with('success', 'Bill created successfully!');
+        return redirect()->route('receptionist.bills.index')->with('success', 'Bill created successfully!');
     }
 }

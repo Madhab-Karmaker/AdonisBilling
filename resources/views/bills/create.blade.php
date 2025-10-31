@@ -16,7 +16,7 @@
     @endif
 
     {{-- Bill Form --}}
-    <form action="{{ route('receptionist.bills.create') }}" method="POST">
+    <form action="{{ route('receptionist.bills.store') }}" method="POST">
         @csrf
 
         {{-- Customer Info --}}

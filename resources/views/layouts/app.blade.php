@@ -55,14 +55,11 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-custom mb-4">
+        <nav class="navbar navbar-expand-lg navbar-custom mb-4">
         @php
-            $dashboard = '#';
-            if(Auth::user()->role == 'manager') {
-                $dashboard = route('dashboard.manager');
-            } elseif(Auth::user()->role == 'receptionist') {
-                $dashboard = route('dashboard.receptionist');
-            }
+            $dashboard = Auth::user()->role == 'manager'
+                        ? route('dashboard.manager')
+                        : route('dashboard.receptionist');
         @endphp
         <div class="container">
             <!-- Brand -->
@@ -78,19 +75,31 @@
             <!-- Navbar Links -->
             <div class="collapse navbar-collapse" id="navbarMenu">
                 <ul class="navbar-nav ms-auto align-items-lg-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('services.index') }}">Services</a>
-                    </li>
-                        
+
+                    {{-- Manager Links --}}
+                    @role('manager')
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('users.index') }}">Users</a>
+                            <a class="nav-link" href="{{ route('manager.services.index') }}">Services</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('receptionist.bills.create') }}">New Bill</a>
+                            <a class="nav-link" href="{{ route('manager.users.index') }}">Users</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('manager.bills.index') }}">All Bills</a>
+                        </li>
+                    @endrole
+
+                    {{-- Receptionist Links --}}
+                    @role('receptionist')
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('receptionist.services.index') }}">Services</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('receptionist.bills.index') }}">All Bills</a>
                         </li>
+                    @endrole
+
+                    {{-- Logout --}}
                     <li class="nav-item ms-lg-3">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
