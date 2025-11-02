@@ -11,7 +11,7 @@ class BillController extends Controller
 {
     public function index()
     {
-        $bills = Bill::with('receptionist')->get();
+        $bills = Bill::with('creator')->get();
         return view('bills.index', compact('bills'));
     }
     
@@ -19,6 +19,12 @@ class BillController extends Controller
     {
         $services = Service::all();
         return view('bills.create', compact('services'));
+    }
+
+    public function show(Bill $bill)
+    {
+        $bill->load('items.service', 'creator');
+        return view('bills.show', compact('bill'));
     }
 
     public function store(Request $request)

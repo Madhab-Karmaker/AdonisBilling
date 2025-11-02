@@ -19,16 +19,49 @@ Route::middleware(['auth'])->group(function() {
 // Manager-only routes
 Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function() {
     Route::resource('users', UserController::class);
-    Route::resource('services', ServiceController::class);
-    Route::get('bills', [BillController::class, 'index'])->name('manager.bills.index');
+    Route::resource('services', ServiceController::class)->names([
+        'index' =>  'manager.services.index',
+        'show' =>   'manager.services.show',
+        'create' => 'manager.services.create',
+        'store' =>  'manager.services.store',
+        'edit' =>   'manager.services.edit',
+        'update' => 'manager.services.update',
+        'destroy' =>'manager.services.destroy',
+    ]);
+    Route::resource('bills', BillController::class)->names([
+        'index' =>  'manager.bills.index',
+        'show' =>   'manager.bills.show',
+        'create' => 'manager.bills.create',
+        'store' =>  'manager.bills.store',
+        'edit' =>   'manager.bills.edit',
+        'update' => 'manager.bills.update',
+        //'destroy' =>'receptionist.bills.destroy',
+    ]);
+
 });
 
 // Receptionist routes
 Route::middleware(['auth', 'role:receptionist'])->prefix('receptionist')->group(function() {
-    Route::get('bills', [BillController::class, 'index'])->name('receptionist.bills.index');
-    Route::get('bills/create', [BillController::class, 'create'])->name('receptionist.bills.create');
-    Route::post('bills', [BillController::class, 'store'])->name('receptionist.bills.store');
-    Route::resource('services', ServiceController::class);
+    Route::resource('bills', BillController::class)->names([
+        'index' =>  'receptionist.bills.index',
+        'show' =>   'receptionist.bills.show',
+        'create' => 'receptionist.bills.create',
+        'store' =>  'receptionist.bills.store',
+        'edit' =>   'receptionist.bills.edit',
+        'update' => 'receptionist.bills.update',
+        //'destroy' =>'receptionist.bills.destroy',
+    ]);
+
+    Route::resource('services', ServiceController::class)->names([
+        'index' =>  'receptionist.services.index',
+        'show' =>   'receptionist.services.show',
+        /*'create' => 'receptionist.services.create',
+        'store' =>  'receptionist.services.store',
+        'edit' =>   'receptionist.services.edit',
+        'update' => 'receptionist.services.update',
+        'destroy' =>'receptionist.services.destroy',*/
+    ]);
+
 });
 
 

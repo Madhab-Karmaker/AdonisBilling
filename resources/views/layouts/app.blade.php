@@ -79,18 +79,29 @@
             <div class="collapse navbar-collapse" id="navbarMenu">
                 <ul class="navbar-nav ms-auto align-items-lg-center">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('services.index') }}">Services</a>
+                        @if(auth()->user()->role === 'manager')
+                            <a class="nav-link" href="{{ route('manager.services.index') }}">Services</a>
+                        @elseif(auth()->user()->role === 'receptionist')
+                            <a class="nav-link" href="{{ route('receptionist.services.index') }}">Services</a>
+                        @endif
                     </li>
+
                         
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('users.index') }}">Users</a>
                         </li>
+                        @php
+                            $prefix = auth()->user()->role === 'manager' ? 'manager' : 'receptionist';
+                              
+                        @endphp
+
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('receptionist.bills.create') }}">New Bill</a>
+                            <a class="nav-link" href="{{ route($prefix . '.bills.create') }}">New Bill</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('receptionist.bills.index') }}">All Bills</a>
+                            <a class="nav-link" href="{{ route($prefix .'.bills.index') }}">All Bills</a>
                         </li>
+
                     <li class="nav-item ms-lg-3">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf

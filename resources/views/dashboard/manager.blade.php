@@ -214,8 +214,8 @@
                 <h3>💼 Service Management</h3>
                 <p>Create and manage salon services, set pricing, and organize service categories.</p>
                 <div class="card-actions">
-                    <a href="{{ route('services.index') }}" class="btn btn-primary">View Services</a>
-                    <a href="{{ route('services.create') }}" class="btn btn-secondary">Add Service</a>
+                    <a href="{{ route('manager.services.index') }}" class="btn btn-primary">View Services</a>
+                    <a href="{{ route('manager.services.create') }}" class="btn btn-secondary">Add Service</a>
                 </div>
             </div>
 

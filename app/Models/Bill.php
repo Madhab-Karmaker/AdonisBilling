@@ -25,8 +25,8 @@ use App\Models\Concerns\BelongsToSalon;
             return $this->hasMany(BillItem::class);
         }
 
-        public function receptionist() {
-            return $this->belongsTo(User::class, 'receptionist_id');
+        public function creator() {
+            return $this->belongsTo(User::class, 'user_id');
         }
 
         public function calculateTotalPrice() {

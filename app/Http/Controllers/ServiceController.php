@@ -28,7 +28,11 @@ class ServiceController extends Controller
 
         Service::create($validated);
 
-        return redirect()->route('services.index')->with('success', 'Service created successfully.');
+        $route = auth()->user()->role === 'manager' ? 'manager.services.index': 'receptionist.services.index';
+
+return redirect()->route($route)->with('success', 'Service created successfully.');
+
+        return redirect()->route($route)->with('success', 'Service created successfully.');
     }
     public function edit(Service $service){
         return view('services.edit', compact('service'));

@@ -4,7 +4,7 @@
 <div class="container">
     <h2 class="mb-4">Add Service for {{ Auth::user()->salon?->name ?? 'No Salon Assigned' }}</h2>
 
-    <form action="{{ route('services.store') }}" method="POST" class="styled-form">
+    <form action="{{ route('manager.services.store') }}" method="POST" class="styled-form">
         @csrf
 
         <div class="mb-3">

@@ -8,20 +8,22 @@
         <table class="styled-table">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>Bill Id</th>
                     <th>Customer Name</th>
                     <th>Order Amount (৳)</th>
                     <th>Customer Phone</th>
+                    <th>Made By </th>
                     <th>Created At</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($bills as $index => $bill)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
+                <tr onclick="window.location='{{ route('manager.bills.show', $bill->id) }}'" style="cursor:pointer;">
+                    <td>{{ $bill->id }}</td>
                     <td>{{ $bill->customer_name }}</td>
                     <td>{{ $bill->total_amount }}</td>
                     <td>{{ $bill->customer_phone }}</td>
+                    <td>{{ $bill->creator->name ?? 'N/A' }}</td>
                     <td>{{ $bill->created_at->format('d M Y h:i A') }}</td>
                 </tr>
                 @endforeach

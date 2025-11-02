@@ -7,7 +7,7 @@
 
         {{-- Only manager can add new service --}}
         @if(auth()->user()->role === 'manager')
-            <a href="{{ route('services.create') }}" class="btn btn-add">
+            <a href="{{ route('manager.services.create') }}" class="btn btn-add">
                 <i class="bi bi-plus-circle me-1"></i> Add New Service
             </a>
         @endif
