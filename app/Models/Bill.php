@@ -9,12 +9,13 @@ use App\Models\Concerns\BelongsToSalon;
     {
         use BelongsToSalon;
         protected $fillable = [
-            'customer_name',
-            'customer_phone',
-            'total_amount',
-            'salon_id',
-            'receptionist_id',
-        ];
+        'customer_name',
+        'customer_phone',
+        'total_amount',
+        'user_id',
+        'salon_id'
+    ];
+
 
         
         public function salon(){

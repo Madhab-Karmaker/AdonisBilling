@@ -4,16 +4,23 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BillController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ManagerDashboardController;
+use App\Http\Controllers\ReceptionistDashboardController; 
 
 // Authentication routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Dashboard routes
+// Dashboard routes (protected by auth middleware)
 Route::middleware(['auth'])->group(function() {
-    Route::get('/dashboard/manager', [AuthController::class, 'managerDashboard'])->name('dashboard.manager');
-    Route::get('/dashboard/receptionist', [AuthController::class, 'receptionistDashboard'])->name('dashboard.receptionist');
+    // Manager Dashboard
+    Route::get('/dashboard/manager', [ManagerDashboardController::class, 'index'])
+        ->name('dashboard.manager');
+
+    // Receptionist Dashboard
+    Route::get('/dashboard/receptionist', [ReceptionistDashboardController::class, 'index'])
+        ->name('dashboard.receptionist');
 });
 
 // Manager-only routes

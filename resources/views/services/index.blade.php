@@ -38,7 +38,7 @@
                 <tbody>
                     @forelse($services as $index => $service)
                         <tr>
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $service->id }}</td>
                             <td class="fw-semibold">{{ $service->name }}</td>
                             <td>{{ number_format($service->price, 2) }}</td>
 
@@ -47,7 +47,7 @@
                                     <a href="{{ route('services.edit', $service) }}" class="btn btn-sm btn-outline-warning me-1">
                                         <i class="bi bi-pencil-square"></i> Edit
                                     </a>
-                                    <form action="{{ route('services.destroy', $service) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('manager.services.destroy', $service) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this service?')">

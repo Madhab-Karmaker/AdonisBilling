@@ -31,19 +31,20 @@ class BillController extends Controller
     {
         // Validation
         $validated = $request->validate([
-            'customer_name' => 'required|string',
-            'customer_phone' => 'nullable|string',
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'nullable|string|max:20',
             'service_id' => 'required|array',
+            'service_id.*' => 'exists:services,id',
             'quantity' => 'required|array',
-            
+            'quantity.*' => 'integer|min:1'
         ]);
 
-        // Create bill for the current user's salon and receptionist
+        // Create bill
         $bill = Bill::create([
             'customer_name' => $validated['customer_name'],
             'customer_phone' => $validated['customer_phone'] ?? null,
-            'total_amount' => 0, // Will update later
-            'receptionist_id' => auth()->id(),
+            'total_amount' => 0, // will update later
+            'user_id' => auth()->id(),
             'salon_id' => auth()->user()->salon_id,
         ]);
 
@@ -51,23 +52,25 @@ class BillController extends Controller
 
         // Loop through services
         foreach ($validated['service_id'] as $key => $serviceId) {
-            $service = Service::find($serviceId);
-            $qty = $validated['quantity'][$key];
-            $price = $service->price * $qty;
+            $service = Service::findOrFail($serviceId);
+            $qty = (int) $validated['quantity'][$key];
+            $subtotal = $service->price * $qty;
 
             BillItem::create([
                 'bill_id' => $bill->id,
                 'service_id' => $serviceId,
                 'quantity' => $qty,
-                'price' => $price
+                'price' => $service->price, // unit price
+                'subtotal' => $subtotal
             ]);
 
-            $total += $price;
+            $total += $subtotal;
         }
 
-        // Update total
+        // Update total amount
         $bill->update(['total_amount' => $total]);
 
-        return redirect()->route('bills.index')->with('success', 'Bill created successfully!');
+        return redirect()->route('manager.bills.index')->with('success', 'Bill created successfully!');
     }
+
 }

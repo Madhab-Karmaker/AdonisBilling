@@ -9,6 +9,8 @@
     {{-- Bill Info --}}
     <div class="card mb-3 p-3">
         <p><strong>Bill ID:</strong> {{ $bill->id }}</p>
+        <p><strong>Customer Name:</strong> {{ $bill->customer_name }}</p>
+        <p><strong>Customer Phone:</strong> {{ $bill->customer_phone }}</p>
         <p><strong>Created by:</strong> {{ $bill->creator->name }} ({{ $bill->creator->role }})</p>
         <p><strong>Created at:</strong> {{ $bill->created_at->format('d M Y, H:i') }}</p>
     </div>

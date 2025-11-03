@@ -16,26 +16,27 @@
     @endif
 
     {{-- Bill Form --}}
-    <form action="{{ route('receptionist.bills.create') }}" method="POST">
+
+    <form method="POST" action="{{ Auth::user()->role === 'manager' ? route('manager.bills.store') : route('receptionist.bills.store') }}">
         @csrf
 
         {{-- Customer Info --}}
         <div class="row mb-3 align-items-end">
             <div class="col-md-6">
-                <label for="customer_name" class="form-label fw-semibold">Customer Name</label>
+                <label for="customer_name" class="form-label">Customer Name</label>
                 <input type="text" name="customer_name" id="customer_name" class="form-control" placeholder="Enter customer name" required>
             </div>
             <div class="col-md-6">
-                <label for="customer_phone" class="form-label fw-semibold">Customer Phone</label>
+                <label for="customer_phone" class="form-label">Customer Phone</label>
                 <input type="tel" name="customer_phone" id="customer_phone" class="form-control" placeholder="Enter phone number" required>
             </div>
         </div>
 
-        {{-- Service Selection --}}
+        {{-- Services --}}
         <div id="services-container">
             <div class="row mb-3 service-row">
                 <div class="col-md-5">
-                    <label class="form-label fw-semibold">Service</label>
+                    <label class="form-label">Service</label>
                     <select name="service_id[]" class="form-select service-select" required>
                         <option value="">-- Select Service --</option>
                         @foreach($services as $service)
@@ -47,12 +48,12 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label fw-semibold">Quantity</label>
+                    <label class="form-label">Quantity</label>
                     <input type="number" name="quantity[]" class="form-control quantity-input" min="1" value="1" required>
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label fw-semibold">Price (৳)</label>
+                    <label class="form-label">Price (৳)</label>
                     <input type="text" class="form-control price-display" readonly>
                 </div>
 
@@ -62,6 +63,7 @@
             </div>
         </div>
 
+        {{-- Add service button + total --}}
         <div class="d-flex justify-content-between align-items-center mb-3">
             <button type="button" class="btn btn-secondary" id="add-service">+ Add Service</button>
             <div class="fw-bold fs-5">
@@ -69,10 +71,16 @@
             </div>
         </div>
 
+        {{-- Hidden total --}}
+        <input type="hidden" name="total_amount" id="total_amount">
+
+        {{-- Submit --}}
         <div class="text-center">
             <button type="submit" class="btn btn-primary px-5">Save Bill</button>
         </div>
     </form>
+
+
 </div>
 
 {{-- ===================== --}}
@@ -126,46 +134,54 @@
 {{--   Bill Logic Script   --}}
 {{-- ===================== --}}
 <script>
-    // Add new service row
-    document.getElementById('add-service').addEventListener('click', function() {
-        const container = document.getElementById('services-container');
-        const firstRow = container.querySelector('.service-row');
-        const newRow = firstRow.cloneNode(true);
-        newRow.querySelectorAll('input, select').forEach(el => el.value = '');
-        container.appendChild(newRow);
+    const container = document.getElementById('services-container');
+
+document.getElementById('add-service').addEventListener('click', () => {
+    const firstRow = container.querySelector('.service-row');
+    const newRow = firstRow.cloneNode(true);
+
+    // Reset values and remove IDs
+    newRow.querySelectorAll('input, select').forEach(el => {
+        el.value = '';
+        el.removeAttribute('id');
     });
 
-    // Remove service row
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-service')) {
-            const rows = document.querySelectorAll('.service-row');
-            if (rows.length > 1) {
-                e.target.closest('.service-row').remove();
-                updateTotal();
-            }
-        }
-    });
+    container.appendChild(newRow);
+    updateTotal();
+});
 
-    // Update price and total dynamically
-    document.addEventListener('input', function(e) {
-        if (e.target.classList.contains('service-select') || e.target.classList.contains('quantity-input')) {
-            const row = e.target.closest('.service-row');
-            const serviceSelect = row.querySelector('.service-select');
-            const qty = row.querySelector('.quantity-input').value;
-            const price = serviceSelect.selectedOptions[0]?.dataset.price || 0;
-            row.querySelector('.price-display').value = price * qty;
+// Event delegation inside container only
+container.addEventListener('click', e => {
+    if (e.target.classList.contains('remove-service')) {
+        const rows = container.querySelectorAll('.service-row');
+        if (rows.length > 1) {
+            e.target.closest('.service-row').remove();
             updateTotal();
         }
-    });
-
-    // Calculate total
-    function updateTotal() {
-        let total = 0;
-        document.querySelectorAll('.price-display').forEach(el => {
-            total += parseFloat(el.value) || 0;
-        });
-        document.getElementById('total-amount').innerText = total.toFixed(2);
-        document.getElementById('total_amount').value = total.toFixed(2);
     }
+});
+
+container.addEventListener('input', e => {
+    if (e.target.classList.contains('service-select') || e.target.classList.contains('quantity-input')) {
+        const row = e.target.closest('.service-row');
+        const serviceSelect = row.querySelector('.service-select');
+        const qty = parseFloat(row.querySelector('.quantity-input').value) || 0;
+        const price = parseFloat(serviceSelect.selectedOptions[0]?.dataset.price) || 0;
+        row.querySelector('.price-display').value = (price * qty).toFixed(2);
+        updateTotal();
+    }
+});
+
+function updateTotal() {
+    let total = 0;
+    container.querySelectorAll('.price-display').forEach(el => {
+        total += parseFloat(el.value) || 0;
+    });
+    document.getElementById('total-amount').innerText = total.toFixed(2);
+
+    const totalInput = document.getElementById('total_amount');
+    if (totalInput) totalInput.value = total.toFixed(2);
+}
+
 </script>
 @endsection
