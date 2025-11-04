@@ -73,6 +73,96 @@
 
         {{-- Hidden total --}}
         <input type="hidden" name="total_amount" id="total_amount">
+       
+        {{-- MAIN Payment Method Dropdown --}}
+        <div class="row mb-3 align-items-end">
+
+    <!-- Payment Method -->
+    <div class="col-md-4">
+        <label for="payment_method" class="form-label">Payment Method</label>
+        <select name="payment_method" id="payment_method" class="form-select" required>
+            <option value="">-- Select Payment Method --</option>
+            <option value="cash">Cash</option>
+            <option value="bkash">bKash</option>
+            <option value="nagad">Nagad</option>
+            <option value="card">Card</option>
+            <option value="bank_transfer">Bank Transfer</option>
+            <option value="partial">Partial Payment</option>
+        </select>
+    </div>
+
+    <!-- Bank Name (hidden by default) -->
+    <div class="col-md-4" id="bank-transfer-wrapper" style="display:none;">
+        <label for="bank_name" class="form-label">Bank Name</label>
+        <input type="text" name="bank_name" id="bank_name" list="banks" class="form-control" placeholder="Type bank name">
+    </div>
+
+    <!-- Optional: Partial Payment Section -->
+    <div class="col-md-4" id="partial-payment-wrapper" style="display:none;">
+        <label for="partial_payment_amount" class="form-label">Partial Payment Amount (৳)</label>
+        <input type="number" name="partial_payment_amount" id="partial_payment_amount" class="form-control" placeholder="Enter partial amount">
+    </div>
+</div>
+
+<!-- Bank List -->
+<datalist id="banks">
+    <option value="Sonali Bank">
+    <option value="Janata Bank">
+    <option value="Rupali Bank">
+    <option value="Agrani Bank">
+    <option value="BRAC Bank">
+    <option value="Dutch Bangla Bank">
+    <option value="City Bank">
+    <option value="Eastern Bank">
+    <option value="Exim Bank">
+    <option value="IFIC Bank">
+    <option value="Islami Bank Bangladesh">
+    <option value="Jamuna Bank">
+    <option value="Mercantile Bank">
+    <option value="Mutual Trust Bank">
+    <option value="National Bank">
+    <option value="NRB Bank">
+    <option value="Prime Bank">
+    <option value="Shahjalal Islami Bank">
+    <option value="Standard Bank">
+    <option value="Trust Bank">
+    <option value="UCBL">
+</datalist>
+        {{--  This entire section will appear only if "Partial Payment" is selected --}}
+        <div id="partial-payment-section" style="display:none;">
+            <h5>Partial Payments</h5>
+            <div id="payments-container">
+                <div class="row payment-row mb-2">
+                    <div class="col-md-4">
+                        <select name="payment_method[]" class="form-select payment-method" required>
+                            <option value="">-- Select Method --</option>
+                            <option value="cash">Cash</option>
+                            <option value="bkash">bKash</option>
+                            <option value="nagad">Nagad</option>
+                            <option value="card">Card</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                        </select>
+                    </div>
+
+
+                    <div class="col-md-4 bank-field" style="display:none;">
+                        <input type="text" name="bank_name[]" class="form-control" placeholder="Bank name">
+                    </div>
+
+                    <div class="col-md-3">
+                        <input type="number" name="payment_amount[]" class="form-control" placeholder="Enter amount" required>
+                    </div>
+                    
+                    <div class="col-md-1 d-flex align-items-center">
+                        <button type="button" class="btn btn-danger remove-payment">−</button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="add-payment" class="btn btn-secondary mt-2">+ Add Payment</button>
+        </div>
+
+
 
         {{-- Submit --}}
         <div class="text-center">
@@ -112,6 +202,77 @@
 </style>
 
 <script>
+    
+    document.addEventListener("DOMContentLoaded", function () {
+
+    const mainPaymentSelect = document.getElementById("payment_method");
+    const partialSection = document.getElementById("partial-payment-section");
+    const bankWrapper = document.getElementById("bank-transfer-wrapper");
+    const container = document.getElementById("payments-container");
+    const addBtn = document.getElementById("add-payment");
+
+    //  Show partial section only if "Partial Payment" is selected
+        mainPaymentSelect.addEventListener("change", () => {
+
+                if (mainPaymentSelect.value === "partial") {
+                    // Show partial section, hide bank input
+                    partialSection.style.display = "block";
+                    bankWrapper.style.display = "none";
+                } 
+                else if (mainPaymentSelect.value === "bank_transfer") {
+                    // Hide partial section, show bank input
+                    partialSection.style.display = "none";
+                    bankWrapper.style.display = "block"; // 
+                    bankInput.setAttribute("list", "banks");
+                } 
+                else {
+                    // Hide both when other payment types are selected
+                    partialSection.style.display = "none";
+                    bankWrapper.style.display = "none";
+
+                    // Optional: reset all partial inputs when hidden
+                    container.querySelectorAll("input, select").forEach(el => el.value = "");
+                }
+        });
+
+        //  Add new payment row
+        addBtn.addEventListener("click", () => {
+            const first = container.querySelector(".payment-row");
+            const clone = first.cloneNode(true);
+            clone.querySelectorAll("input, select").forEach(el => el.value = "");
+            clone.querySelector(".bank-field").style.display = "none";
+            container.appendChild(clone);
+        });
+
+        //  Remove a payment row
+        container.addEventListener("click", (e) => {
+            if (e.target.classList.contains("remove-payment")) {
+                if (container.querySelectorAll(".payment-row").length > 1) {
+                    e.target.closest(".payment-row").remove();
+                }
+            }
+        });
+
+        //  Toggle bank field visibility when bank_transfer selected
+        container.addEventListener("change", (e) => {
+            if (e.target.classList.contains("payment-method")) {
+                const row = e.target.closest(".payment-row");
+                const bankField = row.querySelector(".bank-field");
+
+                if (e.target.value === "bank_transfer") {
+                    bankField.style.display = "block";
+                    bankField.querySelector("input").setAttribute("required", true);
+                } else {
+                    bankField.style.display = "none";
+                    bankField.querySelector("input").removeAttribute("required");
+                    bankField.querySelector("input").value = "";
+                }
+            }
+        });
+    });
+
+
+
     document.addEventListener("DOMContentLoaded", function () {
         const phoneInput = document.querySelector("#customer_phone");
 

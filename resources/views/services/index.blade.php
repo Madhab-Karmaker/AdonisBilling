@@ -44,7 +44,7 @@
 
                             @if(auth()->user()->role === 'manager')
                                 <td>
-                                    <a href="{{ route('services.edit', $service) }}" class="btn btn-sm btn-outline-warning me-1">
+                                    <a href="{{ route('manager.services.edit', $service) }}" class="btn btn-sm btn-outline-warning me-1">
                                         <i class="bi bi-pencil-square"></i> Edit
                                     </a>
                                     <form action="{{ route('manager.services.destroy', $service) }}" method="POST" class="d-inline">

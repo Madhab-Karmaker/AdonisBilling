@@ -284,7 +284,7 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-number">0</div>
+                <div class="stat-number">{{$totalBills}}</div>
                 <div class="stat-label">Today's Bills</div>
             </div>
             <div class="stat-card">

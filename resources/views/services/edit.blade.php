@@ -4,7 +4,7 @@
 <div class="container">
     <h2>Edit Service</h2>
 
-    <form action="{{ route('services.update', $service) }}" method="POST">
+    <form action="{{ route('manager.services.update', $service) }}" method="POST">
         @csrf
         @method('PUT')
 
