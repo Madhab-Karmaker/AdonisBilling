@@ -86,21 +86,29 @@
                         @endif
                     </li>
 
+                    <li class="nav-item">
+                        @if(auth()->user()->role === 'manager')
+                            <a class="nav-link" href="{{ route('manager.staffs.index') }}">Staffs</a>
+                        @elseif(auth()->user()->role === 'receptionist')
+                            <a class="nav-link" href="{{ route('receptionist.staffs.index') }}">Staffs</a>
+                        @endif
+                    </li>
                         
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('users.index') }}">Users</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('users.index') }}">Users</a>
+                    </li>
                         @php
                             $prefix = auth()->user()->role === 'manager' ? 'manager' : 'receptionist';
                               
                         @endphp
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route($prefix . '.bills.create') }}">New Bill</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route($prefix .'.bills.index') }}">All Bills</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route($prefix . '.bills.create') }}">New Bill</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route($prefix .'.bills.index') }}">All Bills</a>
+                    </li>
 
                     <li class="nav-item ms-lg-3">
                         <form method="POST" action="{{ route('logout') }}">

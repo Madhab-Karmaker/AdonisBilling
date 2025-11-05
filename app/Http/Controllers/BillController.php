@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Bill;
 use App\Models\BillItem;
+use App\Models\BillPayment;
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BillController extends Controller
 {
@@ -29,48 +31,143 @@ class BillController extends Controller
 
     public function store(Request $request)
     {
-        // Validation
+        // Validate bill, items, and optional payments (single or multiple)
         $validated = $request->validate([
+            // Bill fields
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'nullable|string|max:20',
-            'service_id' => 'required|array',
-            'service_id.*' => 'exists:services,id',
-            'quantity' => 'required|array',
-            'quantity.*' => 'integer|min:1'
+
+            // Bill items (services)
+            'service_id' => 'required|array|min:1',
+            'service_id.*' => 'required|integer|exists:services,id',
+            'quantity' => 'required|array|min:1',
+            'quantity.*' => 'required|integer|min:1',
+
+            // Optional single (main) or legacy fields from Blade (no type to avoid conflicts with array inputs)
+            'payment_method' => 'nullable',
+            'bank_name' => 'nullable',
+            'partial_payment_amount' => 'nullable|numeric|min:0',
+            'transaction_id' => 'nullable',
+            'paid_at' => 'nullable',
+
+            // Optional multiple partial payments (array inputs)
+            // Example Blade names: payment_amount[], payment_method[], bank_name[], transaction_id[], paid_at[]
+            'payment_amount' => 'sometimes|array',
+            'payment_amount.*' => 'required_with:payment_amount|numeric|min:0.01',
+            // Allow both scalar (main select) and array (partial rows)
+            'payment_method.*' => 'required_with:payment_amount|string|max:50',
+            'bank_name.*' => 'nullable|string|max:100',
+            'transaction_id.*' => 'nullable|string|max:100',
+            'paid_at.*' => 'nullable|date',
         ]);
 
-        // Create bill
-        $bill = Bill::create([
-            'customer_name' => $validated['customer_name'],
-            'customer_phone' => $validated['customer_phone'] ?? null,
-            'total_amount' => 0, // will update later
-            'user_id' => auth()->id(),
-            'salon_id' => auth()->user()->salon_id,
-        ]);
-
-        $total = 0;
-
-        // Loop through services
-        foreach ($validated['service_id'] as $key => $serviceId) {
-            $service = Service::findOrFail($serviceId);
-            $qty = (int) $validated['quantity'][$key];
-            $subtotal = $service->price * $qty;
-
-            BillItem::create([
-                'bill_id' => $bill->id,
-                'service_id' => $serviceId,
-                'quantity' => $qty,
-                'price' => $service->price, // unit price
-                'subtotal' => $subtotal
-            ]);
-
-            $total += $subtotal;
+        // Ensure services and quantities align
+        if (count($validated['service_id']) !== count($validated['quantity'])) {
+            return back()->withErrors(['quantity' => 'Quantity count must match services count.'])->withInput();
         }
 
-        // Update total amount
-        $bill->update(['total_amount' => $total]);
+        // Use a DB transaction to keep bill, items, and payments consistent
+        $bill = DB::transaction(function () use ($validated) {
+            // Create the bill (total_amount and paid_amount will be updated)
+            $bill = Bill::create([
+                'customer_name' => $validated['customer_name'],
+                'customer_phone' => $validated['customer_phone'] ?? null,
+                'total_amount' => 0,
+                'paid_amount' => 0,
+                'is_partial' => false,
+                'user_id' => auth()->id(),
+                'salon_id' => optional(auth()->user())->salon_id,
+            ]);
 
-        return redirect()->route('manager.bills.index')->with('success', 'Bill created successfully!');
+            $totalAmount = 0;
+
+            // Create BillItems from selected services
+            foreach ($validated['service_id'] as $index => $serviceId) {
+                $service = Service::findOrFail($serviceId);
+                $quantity = (int) $validated['quantity'][$index];
+                $lineTotal = $service->price * $quantity;
+
+                BillItem::create([
+                    'bill_id' => $bill->id,
+                    'service_id' => $serviceId,
+                    'quantity' => $quantity,
+                    'price' => $service->price, // unit price captured at time of billing
+                ]);
+
+                $totalAmount += $lineTotal;
+            }
+
+            // Update total amount on the bill
+            $bill->update(['total_amount' => $totalAmount]);
+
+            $totalPaid = 0.0;
+
+            // Handle multiple partial payments if provided as arrays
+            if (!empty($validated['payment_amount']) && is_array($validated['payment_amount'])) {
+                $count = count($validated['payment_amount']);
+                // Align parallel arrays by index
+                for ($i = 0; $i < $count; $i++) {
+                    $amount = (float) ($validated['payment_amount'][$i] ?? 0);
+                    if ($amount <= 0) {
+                        continue; // skip non-positive entries
+                    }
+
+                    BillPayment::create([
+                        'bill_id' => $bill->id,
+                        'amount' => $amount,
+                        'payment_method' => is_array($validated['payment_method'] ?? null) ? ($validated['payment_method'][$i] ?? null) : null,
+                        'bank_name' => is_array($validated['bank_name'] ?? null) ? ($validated['bank_name'][$i] ?? null) : null,
+                        'transaction_id' => is_array($validated['transaction_id'] ?? null) ? ($validated['transaction_id'][$i] ?? null) : null,
+                        'paid_at' => (is_array($validated['paid_at'] ?? null) && isset($validated['paid_at'][$i])) ? $validated['paid_at'][$i] : now(),
+                    ]);
+
+                    $totalPaid += $amount;
+                }
+            }
+            else {
+                // Determine legacy single-payment behavior based on Blade's payment_method select
+                $selectedMethod = $validated['payment_method'] ?? null;
+
+                if ($selectedMethod === 'partial') {
+                    // If a single partial amount is provided, create one partial payment
+                    $partialAmount = (float) ($validated['partial_payment_amount'] ?? 0);
+                    if ($partialAmount > 0) {
+                        BillPayment::create([
+                            'bill_id' => $bill->id,
+                            'amount' => $partialAmount,
+                            'payment_method' => 'partial',
+                            'bank_name' => $validated['bank_name'] ?? null,
+                            'transaction_id' => $validated['transaction_id'] ?? null,
+                            'paid_at' => $validated['paid_at'] ?? now(),
+                        ]);
+                        $totalPaid += $partialAmount;
+                    }
+                } elseif (!empty($selectedMethod)) {
+                    // Treat as full payment of the computed total
+                    BillPayment::create([
+                        'bill_id' => $bill->id,
+                        'amount' => (float) $totalAmount,
+                        'payment_method' => $selectedMethod,
+                        'bank_name' => $validated['bank_name'] ?? null,
+                        'transaction_id' => $validated['transaction_id'] ?? null,
+                        'paid_at' => $validated['paid_at'] ?? now(),
+                    ]);
+                    $totalPaid += (float) $totalAmount;
+                }
+            }
+
+            // Update paid_amount and partial flag based on totalPaid
+            $bill->update([
+                'paid_amount' => $totalPaid,
+                // is_partial is true if the bill is not fully paid yet
+                'is_partial' => $totalPaid < $totalAmount,
+            ]);
+
+            return $bill;
+        });
+
+        return redirect()->route('manager.bills.index')
+            ->with('success', 'Bill created successfully!');
     }
 
 }

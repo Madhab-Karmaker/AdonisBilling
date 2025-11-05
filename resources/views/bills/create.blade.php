@@ -15,7 +15,7 @@
         </div>
     @endif
 
-    {{-- Bill Form --}}
+    {{-- Bill Form --}} 
 
     <form method="POST" action="{{ Auth::user()->role === 'manager' ? route('manager.bills.store') : route('receptionist.bills.store') }}">
         @csrf
@@ -77,64 +77,64 @@
         {{-- MAIN Payment Method Dropdown --}}
         <div class="row mb-3 align-items-end">
 
-    <!-- Payment Method -->
-    <div class="col-md-4">
-        <label for="payment_method" class="form-label">Payment Method</label>
-        <select name="payment_method" id="payment_method" class="form-select" required>
-            <option value="">-- Select Payment Method --</option>
-            <option value="cash">Cash</option>
-            <option value="bkash">bKash</option>
-            <option value="nagad">Nagad</option>
-            <option value="card">Card</option>
-            <option value="bank_transfer">Bank Transfer</option>
-            <option value="partial">Partial Payment</option>
-        </select>
-    </div>
+            <!-- Payment Method -->
+            <div class="col-md-4">
+                <label for="payment_method" class="form-label">Payment Method</label>
+                <select name="payment_method" id="payment_method" class="form-select" required>
+                    <option value="">-- Select Payment Method --</option>
+                    <option value="cash">Cash</option>
+                    <option value="bkash">bKash</option>
+                    <option value="nagad">Nagad</option>
+                    <option value="card">Card</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="partial">Partial Payment</option>
+                </select>
+            </div>
 
-    <!-- Bank Name (hidden by default) -->
-    <div class="col-md-4" id="bank-transfer-wrapper" style="display:none;">
-        <label for="bank_name" class="form-label">Bank Name</label>
-        <input type="text" name="bank_name" id="bank_name" list="banks" class="form-control" placeholder="Type bank name">
-    </div>
+            <!-- Bank Name (hidden by default) -->
+            <div class="col-md-4" id="bank-transfer-wrapper" style="display:none;">
+                <label for="bank_name" class="form-label">Bank Name</label>
+                <input type="text" name="bank_name" id="bank_name" list="banks" class="form-control" placeholder="Type bank name">
+            </div>
 
-    <!-- Optional: Partial Payment Section -->
-    <div class="col-md-4" id="partial-payment-wrapper" style="display:none;">
-        <label for="partial_payment_amount" class="form-label">Partial Payment Amount (৳)</label>
-        <input type="number" name="partial_payment_amount" id="partial_payment_amount" class="form-control" placeholder="Enter partial amount">
-    </div>
-</div>
+            <!-- Optional: Partial Payment Section -->
+            <div class="col-md-4" id="partial-payment-wrapper" style="display:none;">
+                <label for="partial_payment_amount" class="form-label">Partial Payment Amount (৳)</label>
+                <input type="number" name="partial_payment_amount" id="partial_payment_amount" class="form-control" placeholder="Enter partial amount">
+            </div>
+        </div>
 
-<!-- Bank List -->
-<datalist id="banks">
-    <option value="Sonali Bank">
-    <option value="Janata Bank">
-    <option value="Rupali Bank">
-    <option value="Agrani Bank">
-    <option value="BRAC Bank">
-    <option value="Dutch Bangla Bank">
-    <option value="City Bank">
-    <option value="Eastern Bank">
-    <option value="Exim Bank">
-    <option value="IFIC Bank">
-    <option value="Islami Bank Bangladesh">
-    <option value="Jamuna Bank">
-    <option value="Mercantile Bank">
-    <option value="Mutual Trust Bank">
-    <option value="National Bank">
-    <option value="NRB Bank">
-    <option value="Prime Bank">
-    <option value="Shahjalal Islami Bank">
-    <option value="Standard Bank">
-    <option value="Trust Bank">
-    <option value="UCBL">
-</datalist>
+        <!-- Bank List -->
+        <datalist id="banks">
+            <option value="Sonali Bank">
+            <option value="Janata Bank">
+            <option value="Rupali Bank">
+            <option value="Agrani Bank">
+            <option value="BRAC Bank">
+            <option value="Dutch Bangla Bank">
+            <option value="City Bank">
+            <option value="Eastern Bank">
+            <option value="Exim Bank">
+            <option value="IFIC Bank">
+            <option value="Islami Bank Bangladesh">
+            <option value="Jamuna Bank">
+            <option value="Mercantile Bank">
+            <option value="Mutual Trust Bank">
+            <option value="National Bank">
+            <option value="NRB Bank">
+            <option value="Prime Bank">
+            <option value="Shahjalal Islami Bank">
+            <option value="Standard Bank">
+            <option value="Trust Bank">
+            <option value="UCBL">
+        </datalist>
         {{--  This entire section will appear only if "Partial Payment" is selected --}}
         <div id="partial-payment-section" style="display:none;">
             <h5>Partial Payments</h5>
             <div id="payments-container">
                 <div class="row payment-row mb-2">
                     <div class="col-md-4">
-                        <select name="payment_method[]" class="form-select payment-method" required>
+                        <select name="payment_method[]" class="form-select payment-method">
                             <option value="">-- Select Method --</option>
                             <option value="cash">Cash</option>
                             <option value="bkash">bKash</option>
@@ -150,7 +150,7 @@
                     </div>
 
                     <div class="col-md-3">
-                        <input type="number" name="payment_amount[]" class="form-control" placeholder="Enter amount" required>
+                        <input type="number" name="payment_amount[]" class="form-control" placeholder="Enter amount">
                     </div>
                     
                     <div class="col-md-1 d-flex align-items-center">
@@ -208,30 +208,43 @@
     const mainPaymentSelect = document.getElementById("payment_method");
     const partialSection = document.getElementById("partial-payment-section");
     const bankWrapper = document.getElementById("bank-transfer-wrapper");
+    const bankInput = document.getElementById("bank_name");
     const container = document.getElementById("payments-container");
     const addBtn = document.getElementById("add-payment");
 
     //  Show partial section only if "Partial Payment" is selected
         mainPaymentSelect.addEventListener("change", () => {
-
                 if (mainPaymentSelect.value === "partial") {
                     // Show partial section, hide bank input
                     partialSection.style.display = "block";
                     bankWrapper.style.display = "none";
+                    // Enable and require partial fields
+                    container.querySelectorAll("input[name='payment_amount[]'], select[name='payment_method[]']").forEach(el => {
+                        el.disabled = false;
+                        el.required = true;
+                    });
                 } 
                 else if (mainPaymentSelect.value === "bank_transfer") {
                     // Hide partial section, show bank input
                     partialSection.style.display = "none";
-                    bankWrapper.style.display = "block"; // 
-                    bankInput.setAttribute("list", "banks");
+                    bankWrapper.style.display = "block";
+                    if (bankInput) bankInput.setAttribute("list", "banks");
+                    // Disable and unrequire partial fields
+                    container.querySelectorAll("input[name='payment_amount[]'], select[name='payment_method[]']").forEach(el => {
+                        el.required = false;
+                        el.disabled = true;
+                    });
                 } 
                 else {
                     // Hide both when other payment types are selected
                     partialSection.style.display = "none";
                     bankWrapper.style.display = "none";
-
-                    // Optional: reset all partial inputs when hidden
-                    container.querySelectorAll("input, select").forEach(el => el.value = "");
+                    // Disable, unrequire and clear partial inputs when hidden
+                    container.querySelectorAll("input, select").forEach(el => {
+                        el.required = false;
+                        el.disabled = true;
+                        el.value = "";
+                    });
                 }
         });
 
@@ -239,7 +252,10 @@
         addBtn.addEventListener("click", () => {
             const first = container.querySelector(".payment-row");
             const clone = first.cloneNode(true);
-            clone.querySelectorAll("input, select").forEach(el => el.value = "");
+            clone.querySelectorAll("input, select").forEach(el => {
+                el.value = "";
+                el.disabled = false; // ensure newly added rows are enabled
+            });
             clone.querySelector(".bank-field").style.display = "none";
             container.appendChild(clone);
         });

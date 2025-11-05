@@ -6,6 +6,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ManagerDashboardController;
 use App\Http\Controllers\ReceptionistDashboardController; 
+use App\Http\Controllers\StaffController;
 
 // Authentication routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -44,6 +45,15 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function()
         'update' => 'manager.bills.update',
         //'destroy' =>'receptionist.bills.destroy',
     ]);
+    Route::resource('staffs', StaffController::class)->names([
+        'index' =>  'manager.staffs.index',
+        'show' =>   'manager.staffs.show',
+        'create' => 'manager.staffs.create',
+        'store' =>  'manager.staffs.store',
+        'edit' =>   'manager.staffs.edit',
+        'update' => 'manager.staffs.update',
+        'destroy' =>'manager.staffs.destroy',
+    ]);
 
 });
 
@@ -67,6 +77,16 @@ Route::middleware(['auth', 'role:receptionist'])->prefix('receptionist')->group(
         'edit' =>   'receptionist.services.edit',
         'update' => 'receptionist.services.update',
         'destroy' =>'receptionist.services.destroy',*/
+    ]);
+
+    Route:: resource('staffs',StaffController::class)->names([
+        'index' =>  'receptionist.staffs.index',
+        'show' =>   'receptionist.staffs.show',
+        /*'create' => 'receptionist.staffs.create',
+        'store' =>  'receptionist.staffs.store',
+        'edit' =>   'receptionist.staffs.edit',
+        'update' => 'receptionist.staffs.update',
+        'destroy' =>'receptionist.staffs.destroy',*/
     ]);
 
 });

@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('bills', function (Blueprint $table) {
-            $table->string('paid_amount')->nullable()->after('total_amount');
-            $table->boolean('is_partial')->default(false)->after('paid_amount');
+        Schema::create('bill_item_staff', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('bill_item_id')->constrained()->onDelete('cascade');
+            $table->foreignId('staff_id')->constrained('staff')->onDelete('cascade');
+            $table->timestamps();
         });
+
     }
 
     /**
@@ -22,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('bills', function (Blueprint $table) {
-            $table->dropColumn('payment_method');
-        });
+        Schema::dropIfExists('bill_item_staff');
     }
 };

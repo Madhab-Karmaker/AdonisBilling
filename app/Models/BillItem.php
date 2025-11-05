@@ -19,5 +19,12 @@ class BillItem extends Model
     public function bill() {
         return $this->belongsTo(Bill::class);
     }
+    
+    
+    public function staffs()
+    {
+        return $this->belongsToMany(Staff::class, 'bill_item_staff');
+    }
+
 
 }
