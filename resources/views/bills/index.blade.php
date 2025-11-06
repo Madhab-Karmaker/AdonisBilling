@@ -4,6 +4,33 @@
 <div class="container mt-5 mb-5 p-4 shadow rounded bg-light">
     <h2 class="mb-4 text-center" style="color: #32bbed;">All Bills</h2>
 
+    {{-- Filters --}}
+    <form method="GET" class="mb-3">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" class="form-control" placeholder="Search (Bill ID, Name, Phone)">
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}" class="form-control" placeholder="From">
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}" class="form-control" placeholder="To">
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-control">
+                    <option value="">Status (All)</option>
+                    <option value="paid" {{ ($filters['status'] ?? '') === 'paid' ? 'selected' : '' }}>Paid</option>
+                    <option value="partial" {{ ($filters['status'] ?? '') === 'partial' ? 'selected' : '' }}>Partial</option>
+                    <option value="unpaid" {{ ($filters['status'] ?? '') === 'unpaid' ? 'selected' : '' }}>Unpaid</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary me-2">Filter</button>
+                <a href="{{ request()->url() }}" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+
     <div class="table-responsive">
         <table class="styled-table">
             <thead>

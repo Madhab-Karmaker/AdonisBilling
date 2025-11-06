@@ -17,7 +17,7 @@ class ReceptionistDashboardController extends Controller
         $totalBills = Bill::where('salon_id', $user->salon_id)
             ->whereDate('created_at', today())
             ->count();
-        return view('receptionist.dashboard', compact(
+        return view('dashboard.receptionist', compact(
             'user',
             'totalUsers',
             'totalServices',

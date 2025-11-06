@@ -45,6 +45,7 @@ Route::middleware(['auth', 'role:manager'])->prefix('manager')->group(function()
         'update' => 'manager.bills.update',
         //'destroy' =>'receptionist.bills.destroy',
     ]);
+    Route::get('bills/{bill}/receipt', [BillController::class, 'receipt'])->name('manager.bills.receipt');
     Route::resource('staffs', StaffController::class)->names([
         'index' =>  'manager.staffs.index',
         'show' =>   'manager.staffs.show',
@@ -68,6 +69,9 @@ Route::middleware(['auth', 'role:receptionist'])->prefix('receptionist')->group(
         'update' => 'receptionist.bills.update',
         //'destroy' =>'receptionist.bills.destroy',
     ]);
+
+    Route::get('bills/{bill}/print', [BillController::class, 'print'])->name('receptionist.bills.print');
+    Route::get('bills/{bill}/receipt', [BillController::class, 'receipt'])->name('receptionist.bills.receipt');
 
     Route::resource('services', ServiceController::class)->names([
         'index' =>  'receptionist.services.index',

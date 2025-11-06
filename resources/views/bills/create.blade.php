@@ -212,6 +212,12 @@
     const container = document.getElementById("payments-container");
     const addBtn = document.getElementById("add-payment");
 
+    // Disable all partial inputs on load (they are hidden initially)
+    container.querySelectorAll("input, select").forEach(el => {
+        el.disabled = true;
+        el.required = false;
+    });
+
     //  Show partial section only if "Partial Payment" is selected
         mainPaymentSelect.addEventListener("change", () => {
                 if (mainPaymentSelect.value === "partial") {
@@ -299,10 +305,21 @@
             separateDialCode: true,
         });
 
+        // Keep the input synced to full E.164
+        const syncPhone = () => {
+            const full = iti.getNumber();
+            if (full) {
+                phoneInput.value = full;
+            }
+        };
+        phoneInput.addEventListener("blur", syncPhone);
+        phoneInput.addEventListener("change", syncPhone);
+        phoneInput.addEventListener("keyup", syncPhone);
+
         // Store full number with country code when submitting
         const form = phoneInput.closest("form");
         form.addEventListener("submit", function () {
-            phoneInput.value = iti.getNumber(); // e.g. +8801712345678
+            syncPhone();
         });
     });
 </script>

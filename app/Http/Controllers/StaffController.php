@@ -16,7 +16,7 @@ class StaffController extends Controller
         $staffs = Staff::where('salon_id', auth()->user()->salon_id)->get();
 
         // Return the staff index view with the fetched data
-        return view('staff.index', compact('staffs'));
+        return view('staffs.index', compact('staffs'));
     }
 
     /**
@@ -25,7 +25,7 @@ class StaffController extends Controller
     public function create()
     {
         // Return a form to add a new staff member
-        return view('staff.create');
+        return view('staffs.create');
     }
 
     /**
@@ -51,7 +51,7 @@ class StaffController extends Controller
         ]);
 
         // Redirect back with a success message
-        return redirect()->route('staff.index')->with('success', 'Staff added successfully!');
+        return redirect()->route('manager.staffs.index')->with('success', 'Staff added successfully!');
     }
 
     /**
@@ -65,7 +65,7 @@ class StaffController extends Controller
         }
 
         // Return the edit form view
-        return view('staff.edit', compact('staff'));
+        return view('staffs.edit', compact('staff'));
     }
 
     /**
@@ -90,7 +90,7 @@ class StaffController extends Controller
         $staff->update($validated);
 
         // Redirect with a success message
-        return redirect()->route('staff.index')->with('success', 'Staff updated successfully!');
+        return redirect()->route('manager.staffs.index')->with('success', 'Staff updated successfully!');
     }
 
     /**
@@ -107,6 +107,6 @@ class StaffController extends Controller
         $staff->delete();
 
         // Redirect with a success message
-        return redirect()->route('staff.index')->with('success', 'Staff deleted successfully!');
+        return redirect()->route('manager.staffs.index')->with('success', 'Staff deleted successfully!');
     }
 }

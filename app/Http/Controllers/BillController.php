@@ -11,10 +11,54 @@ use Illuminate\Support\Facades\DB;
 
 class BillController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $bills = Bill::with('creator')->get();
-        return view('bills.index', compact('bills'));
+        $query = Bill::with('creator');
+
+        // Search by bill id, customer name, or phone
+        if ($search = trim((string) $request->get('q'))) {
+            $query->where(function ($q) use ($search) {
+                if (is_numeric($search)) {
+                    $q->orWhere('id', (int) $search);
+                }
+                $q->orWhere('customer_name', 'like', "%{$search}%")
+                  ->orWhere('customer_phone', 'like', "%{$search}%");
+            });
+        }
+
+        // Date range filter
+        if ($from = $request->get('date_from')) {
+            $query->whereDate('created_at', '>=', $from);
+        }
+        if ($to = $request->get('date_to')) {
+            $query->whereDate('created_at', '<=', $to);
+        }
+
+        // Payment status filter: paid | partial | unpaid
+        if ($status = $request->get('status')) {
+            if ($status === 'paid') {
+                $query->whereColumn('paid_amount', '>=', 'total_amount');
+            } elseif ($status === 'partial') {
+                $query->whereColumn('paid_amount', '<', 'total_amount')
+                      ->where('paid_amount', '>', 0);
+            } elseif ($status === 'unpaid') {
+                $query->where(function ($q) {
+                    $q->whereNull('paid_amount')->orWhere('paid_amount', 0);
+                });
+            }
+        }
+
+        $bills = $query->orderByDesc('created_at')->get();
+
+        return view('bills.index', [
+            'bills' => $bills,
+            'filters' => [
+                'q' => $request->get('q'),
+                'date_from' => $request->get('date_from'),
+                'date_to' => $request->get('date_to'),
+                'status' => $request->get('status'),
+            ],
+        ]);
     }
     
     public function create()
@@ -29,13 +73,19 @@ class BillController extends Controller
         return view('bills.show', compact('bill'));
     }
 
+    public function receipt(Bill $bill)
+    {
+        $bill->load(['salon', 'items.service', 'items.staffs', 'payments']);
+        return view('bills.receipt', compact('bill'));
+    }
+
     public function store(Request $request)
     {
         // Validate bill, items, and optional payments (single or multiple)
         $validated = $request->validate([
             // Bill fields
             'customer_name' => 'required|string|max:255',
-            'customer_phone' => 'nullable|string|max:20',
+            'customer_phone' => 'required|string|max:20',
 
             // Bill items (services)
             'service_id' => 'required|array|min:1',
@@ -43,9 +93,9 @@ class BillController extends Controller
             'quantity' => 'required|array|min:1',
             'quantity.*' => 'required|integer|min:1',
 
-            // Optional single (main) or legacy fields from Blade (no type to avoid conflicts with array inputs)
-            'payment_method' => 'nullable',
-            'bank_name' => 'nullable',
+            // Optional single (main) or legacy fields from Blade
+            'payment_method' => 'nullable|string|max:50',
+            'bank_name' => 'nullable|string|max:100',
             'partial_payment_amount' => 'nullable|numeric|min:0',
             'transaction_id' => 'nullable',
             'paid_at' => 'nullable',
@@ -53,9 +103,8 @@ class BillController extends Controller
             // Optional multiple partial payments (array inputs)
             // Example Blade names: payment_amount[], payment_method[], bank_name[], transaction_id[], paid_at[]
             'payment_amount' => 'sometimes|array',
-            'payment_amount.*' => 'required_with:payment_amount|numeric|min:0.01',
-            // Allow both scalar (main select) and array (partial rows)
-            'payment_method.*' => 'required_with:payment_amount|string|max:50',
+            'payment_amount.*' => 'nullable|numeric|min:0.01',
+            'payment_method.*' => 'nullable|string|max:50',
             'bank_name.*' => 'nullable|string|max:100',
             'transaction_id.*' => 'nullable|string|max:100',
             'paid_at.*' => 'nullable|date',
@@ -63,6 +112,7 @@ class BillController extends Controller
 
         // Ensure services and quantities align
         if (count($validated['service_id']) !== count($validated['quantity'])) {
+            
             return back()->withErrors(['quantity' => 'Quantity count must match services count.'])->withInput();
         }
 
@@ -112,10 +162,16 @@ class BillController extends Controller
                         continue; // skip non-positive entries
                     }
 
+                    $method = is_array($validated['payment_method'] ?? null) ? ($validated['payment_method'][$i] ?? null) : null;
+                    if (empty($method)) {
+                        // Skip entries without a method to avoid validation noise
+                        continue;
+                    }
+
                     BillPayment::create([
                         'bill_id' => $bill->id,
                         'amount' => $amount,
-                        'payment_method' => is_array($validated['payment_method'] ?? null) ? ($validated['payment_method'][$i] ?? null) : null,
+                        'payment_method' => $method,
                         'bank_name' => is_array($validated['bank_name'] ?? null) ? ($validated['bank_name'][$i] ?? null) : null,
                         'transaction_id' => is_array($validated['transaction_id'] ?? null) ? ($validated['transaction_id'][$i] ?? null) : null,
                         'paid_at' => (is_array($validated['paid_at'] ?? null) && isset($validated['paid_at'][$i])) ? $validated['paid_at'][$i] : now(),

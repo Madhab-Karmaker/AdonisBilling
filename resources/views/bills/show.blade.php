@@ -13,6 +13,13 @@
         <p><strong>Customer Phone:</strong> {{ $bill->customer_phone }}</p>
         <p><strong>Created by:</strong> {{ $bill->creator->name }} ({{ $bill->creator->role }})</p>
         <p><strong>Created at:</strong> {{ $bill->created_at->format('d M Y, H:i') }}</p>
+        <div class="mt-2">
+            @if(auth()->user()->role === 'manager')
+                <a class="btn btn-sm btn-primary" target="_blank" href="{{ route('manager.bills.receipt', $bill) }}">Print Receipt</a>
+            @elseif(auth()->user()->role === 'receptionist')
+                <a class="btn btn-sm btn-primary" target="_blank" href="{{ route('receptionist.bills.receipt', $bill) }}">Print Receipt</a>
+            @endif
+        </div>
     </div>
 
     {{-- Bill Items --}}
@@ -29,7 +36,7 @@
         <tbody>
             @foreach($bill->items as $item)
             <tr>
-                <td>{{ $item->service->name }}</td>
+                <td>{{ $item->service->name ?? 'Deleted Service' }}</td>
                 <td>{{ $item->quantity }}</td>
                 <td>{{ number_format($item->price, 2) }}</td>
                 <td>{{ number_format($item->quantity * $item->price, 2) }}</td>
